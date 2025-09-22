@@ -1,31 +1,3 @@
-# cppenv
-
-cppenv is a header-only C++ library that makes it easy to manage .env files in your projects.
-
----
-
-## ✨ Features 
-
-- Load `.env` files securely and easily
-
-- Header-only : just include and use
-
-- Simple API for accessing environment variables
-
-- Ideal for config management in C++ projects
-
----
-
-## 🚀 Quick Start
-
-
-
-1. *Install :*  
-    Just copy the cppenv directory into your project - no build step is required.
-
-2. *Use :*
-
-```cpp
 #include <iostream>
 #include <cppenv/cppenv.hpp>
 
@@ -57,10 +29,6 @@ int main(){
     std::cout << "DISCORD_TOKEN : " << *api_key_discord << "\n" << "NETFLIX_TOKEN : " << *api_key_netflix << "\n" << "SERVER_PORT : " << *server_port  << "\n";
 
 
+
     return 0;
 }
-```
-
-3. *screenshot :*
-
-![cppenv.png](cppenv.png)
