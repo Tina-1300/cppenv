@@ -70,6 +70,10 @@ namespace cppenv{
                 return std::nullopt;  // Returns an empty value if the key does not exist
             }
 
+            std::optional<std::string> operator[](const std::string& key) const {
+                return get_value(key);
+            }
+
 
             template<typename T>
             std::optional<T> get_value_as(const std::string& key) const {

@@ -16,7 +16,7 @@ int main(){
 
     std::optional<std::string> api_key_discord = envManager.get_value("DISCORD_TOKEN");
 
-    std::optional<std::string> api_key_netflix = envManager.get_value("NETFLIX_TOKEN");
+    std::optional<std::string> api_key_netflix = envManager["NETFLIX_TOKEN"];
 
     std::optional<int> server_port = envManager.get_value_as<int>("SERVER_PORT");
 
