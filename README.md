@@ -44,7 +44,7 @@ int main(){
 
     std::optional<std::string> api_key_discord = envManager.get_value("DISCORD_TOKEN");
 
-    std::optional<std::string> api_key_netflix = envManager.get_value("NETFLIX_TOKEN");
+    std::optional<std::string> api_key_netflix = envManager["NETFLIX_TOKEN"];
 
     std::optional<int> server_port = envManager.get_value_as<int>("SERVER_PORT");
 
@@ -55,6 +55,7 @@ int main(){
     std::cout << "DATABASE_URL : " << *db_url << "\n" << "TELEGRAM_TOKEN : " << *api_key_telegram << "\n";
 
     std::cout << "DISCORD_TOKEN : " << *api_key_discord << "\n" << "NETFLIX_TOKEN : " << *api_key_netflix << "\n" << "SERVER_PORT : " << *server_port  << "\n";
+
 
 
     return 0;
