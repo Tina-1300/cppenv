@@ -10,3 +10,9 @@
 ## [1.1.0] - 2025-08-03
 ### Add
 - Added string operator overload
+
+## [1.2.0] - 2025-10-18
+### Add
+
+- added operator overloading [] for all types
+- added string_to_bool function

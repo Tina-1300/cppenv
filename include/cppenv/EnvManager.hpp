@@ -75,6 +75,16 @@ namespace cppenv{
             }
 
 
+            template<typename T> std::optional<T> operator[](const char* key) const {
+                return get_value_as<T>(std::string(key));
+            }
+
+            /*
+            template<typename T, typename std::enable_if<!std::is_same_v<T, std::string>, int>::type = 0>
+                std::optional<T> operator[](const std::string& key) const {
+                return get_value_as<T>(key);
+            }*/
+
             template<typename T>
             std::optional<T> get_value_as(const std::string& key) const {
 
@@ -97,7 +107,12 @@ namespace cppenv{
                     
                     return std::nullopt;
                 
-                } else{
+                }else if constexpr (std::is_same<T, std::string>::value){
+
+                    return it->second;
+
+                }else{
+
 
                     iss >> value;
 
@@ -157,6 +172,3 @@ namespace cppenv{
 
 
 }
-
-
-
