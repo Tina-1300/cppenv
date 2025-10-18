@@ -1,0 +1,66 @@
+name: CI - Multi-OS Unit Tests
+
+on:
+  push:
+    branches: [ dev, main ]
+  pull_request:
+    branches: [ dev, main ]
+
+jobs:
+  build-and-test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
+      fail-fast: false  
+
+    steps:
+
+    - uses: actions/checkout@v4
+
+
+    - name: Setup MSYS2 (Windows)
+      if: matrix.os == 'windows-latest'
+      uses: msys2/setup-msys2@v2
+      with:
+        msystem: MINGW64
+        install: >-
+          mingw-w64-x86_64-toolchain
+          mingw-w64-x86_64-cmake
+          mingw-w64-x86_64-make
+        update: true
+        path-type: minimal
+
+
+    - name: Add MSYS2 MinGW to PATH (Windows)
+      if: matrix.os == 'windows-latest'
+      run: echo "C:/msys64/mingw64/bin" >> $GITHUB_PATH
+
+
+    - name: Install dependencies (Linux)
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential cmake
+
+
+    - name: Install dependencies (macOS)
+      if: matrix.os == 'macos-latest'
+      run: |
+        brew install cmake
+
+
+    - name: Configure CMake
+      run: |
+        mkdir build
+        cd build
+        cmake .. ${{ matrix.os == 'windows-latest' && '-G "MinGW Makefiles"' || '' }} -DCMAKE_BUILD_TYPE=Release
+
+
+    - name: Build
+      working-directory: build
+      run: cmake --build . --config Release -j 2
+
+    - name: Test
+      working-directory: build
+      run: ctest -C Release --output-on-failure
