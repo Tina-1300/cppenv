@@ -44,6 +44,27 @@ TEST_CASE("EnvManager loads environment variables from an .env file") {
         CHECK(*netflix_token == "sqdfjshjusdf67");
     }
 
+    SUBCASE("method to return list of env names"){
+        envManager.load_from_file(ENV_FILE_PATH);
+        std::vector<std::string> l = envManager.names();
+
+        std::vector<std::string> expected = {
+            "DATABASE_URL",
+            "TELEGRAM_TOKEN",
+            "DISCORD_TOKEN",
+            "NETFLIX_TOKEN",
+            "SERVER_PORT",
+            "BUILD_RELEASE"
+        };
+
+        CHECK(l.size() == expected.size());
+
+        for (const auto& name : expected){
+            CHECK(std::find(l.begin(), l.end(), name) != l.end());
+        }
+
+    }
+
     SUBCASE("Accessing a bool environment variable with the [] operator"){
 
         envManager.load_from_file(ENV_FILE_PATH);

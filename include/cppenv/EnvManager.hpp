@@ -109,6 +109,17 @@ namespace cppenv{
 
             }
 
+            std::vector<std::string> names() const override {
+                std::vector<std::string> keys;
+                keys.reserve(env_vars.size());
+
+                for (const auto& kv : env_vars){
+                    keys.push_back(kv.first);
+                }
+
+                return keys;
+            }
+
 
         private:
 
