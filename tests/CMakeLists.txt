@@ -20,3 +20,4 @@ endfunction()
 
 
 add_tests(test_env_manager test_env_manager.cpp)
+add_tests(test_unicode test_unicode.cpp)

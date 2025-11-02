@@ -16,46 +16,33 @@ namespace cppenv{
     class EnvManager : public IEnvManager {
         public:
 
-            bool load_from_file(const std::string& filename) override {
-
-                std::ifstream file(filename);
-
-                if (!file.is_open()){
-
-                    std::cerr << "Error opening .env file\n";
-
-                    return false;
-                }
-
-                std::string line;
-
-                while (std::getline(file, line)){
-            
-                    line = trim(line);
-
-                    if (line.empty() || line[0] == '#') continue;
-
-                    
-                    size_t equal_pos = line.find('=');
-
-                    if (equal_pos != std::string::npos){
-
-                        std::string key = trim(line.substr(0, equal_pos));
-
-                        std::string value = trim(line.substr(equal_pos + 1));
-
-                        value = remove_inline_comment(value);
-                        value = strip_quotes(value);
-
-                        env_vars[key] = value;
+            bool load_from_file(const std::filesystem::path& filename) override {
+                #ifdef _WIN32
+                    FILE* fp = _wfopen(filename.c_str(), L"rb");
+                    if (!fp){
+                        std::wcerr << L"Error opening .env file : " << filename.wstring() << std::endl;
+                        return false;
                     }
 
-                }
+                    std::stringstream ss;
+                    char buffer[1024];
+                    while (fgets(buffer, sizeof(buffer), fp)){ss << buffer;}
+                    fclose(fp);
+                    parse_env_stream(ss);
 
-                file.close();
+                #else
+                    std::ifstream file(filename, std::ios::in | std::ios::binary);
+                    if (!file.is_open()){
+                        std::cerr << "Error opening .env file : " << filename.string() << std::endl;
+                        return false;
+                    }
+
+                    parse_env_stream(file);
+                #endif
 
                 return true;
             }
+
 
             std::optional<std::string> get_value(const std::string& key) const override {
 
@@ -166,6 +153,24 @@ namespace cppenv{
                 return value;
 
             }
+
+            void parse_env_stream(std::istream& stream){
+                std::string line;
+                while (std::getline(stream, line)){
+                    line = trim(line);
+                    if (line.empty() || line[0] == '#'){continue;}
+
+                    size_t equal_pos = line.find('=');
+                    if (equal_pos != std::string::npos){
+                        std::string key = trim(line.substr(0, equal_pos));
+                        std::string value = trim(line.substr(equal_pos + 1));
+                        value = remove_inline_comment(value);
+                        value = strip_quotes(value);
+                        env_vars[key] = value;
+                    }
+                }
+            }
+
 
     };
 
