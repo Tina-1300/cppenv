@@ -17,3 +17,11 @@
 - added operator overloading [] for all types
 - added string_to_bool function
 
+## [1.2.1] - 2025-11-02
+### Fixed
+
+- (Windows, Linux) Correct handling of Unicode filenames in `load_from_file`
+  - Fixed compatibility with MinGW and MSVC using `_wfopen` on Windows.
+  - Ensures `.env` files with names like `文件名.env` load correctly.
+
+
