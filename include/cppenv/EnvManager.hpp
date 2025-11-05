@@ -109,7 +109,7 @@ namespace cppenv{
 
             }
 
-            std::vector<std::string> names() const override {
+            /* std::vector<std::string> names() const override {
                 std::vector<std::string> keys;
                 keys.reserve(env_vars.size());
 
@@ -118,12 +118,16 @@ namespace cppenv{
                 }
 
                 return keys;
-            }
+            }*/
 
+            std::vector<std::string> names() const override {
+                return ordered_keys;
+            }
 
         private:
 
             std::unordered_map<std::string, std::string> env_vars;
+            std::vector<std::string> ordered_keys;
 
             static std::string trim(const std::string& str){
                 
@@ -164,7 +168,7 @@ namespace cppenv{
                 return value;
 
             }
-
+            
             void parse_env_stream(std::istream& stream){
                 std::string line;
                 while (std::getline(stream, line)){
@@ -177,6 +181,11 @@ namespace cppenv{
                         std::string value = trim(line.substr(equal_pos + 1));
                         value = remove_inline_comment(value);
                         value = strip_quotes(value);
+
+                        if (env_vars.find(key) == env_vars.end()){
+                            ordered_keys.push_back(key);
+                        }
+
                         env_vars[key] = value;
                     }
                 }
