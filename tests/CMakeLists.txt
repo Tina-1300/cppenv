@@ -21,3 +21,4 @@ endfunction()
 
 add_tests(test_env_manager test_env_manager.cpp)
 add_tests(test_unicode test_unicode.cpp)
+add_tests(test_UTF-8_file_key test_UTF-8_file_key.cpp)

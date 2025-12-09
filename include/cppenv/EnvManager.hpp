@@ -146,7 +146,7 @@ namespace cppenv{
                 for (size_t i = 0; i < value.size(); ++i){
                     char c = value[i];
 
-                    if (c == '"') in_quotes = !in_quotes;
+                    if (c == '"' ) in_quotes = !in_quotes; 
 
                     if(!in_quotes && c == '#') break;
 
@@ -158,17 +158,19 @@ namespace cppenv{
 
             }
 
-
+            // fix bug " and '
             static std::string strip_quotes(const std::string& value){
 
-                if (value.size() >= 2 && (value.front() == '"' && value.back() == '"')){
+                if (value.size() >= 2 && (value.front() == '"' && value.back() == '"' || 
+                    value.front() == '\'' && value.back() == '\'')){
+
                     return value.substr(1, value.size() - 2);
                 }
 
                 return value;
 
             }
-            
+            // bug parsing logical : todo fix
             void parse_env_stream(std::istream& stream){
                 std::string line;
                 while (std::getline(stream, line)){

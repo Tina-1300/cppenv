@@ -9,10 +9,11 @@
 using namespace cppenv::type;
 
 TEST_CASE("EnvManager Unicode Filename Handling"){
-    cppenv::EnvManager envManager;
+    
 
     SUBCASE("Load .env file with Unicode filename (e.g., '文件名.env')") {
-        
+        cppenv::EnvManager envManager;
+
         #ifdef _WIN32
             const std::filesystem::path unicode_path = L"../../tests/文件名.env"; 
         #else
@@ -34,4 +35,16 @@ TEST_CASE("EnvManager Unicode Filename Handling"){
         }
 
     }
+
+    SUBCASE("read unicode data"){
+        cppenv::EnvManager envManager;
+
+        envManager.load_from_file("../../tests/test.env");
+
+        std::vector<std::string> l = envManager.names();
+
+        
+
+    }
+
 }
