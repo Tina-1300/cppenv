@@ -1,5 +1,3 @@
-// 會意
-
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include "../dep/doctest.h"
 
@@ -20,15 +18,22 @@ TEST_CASE("EnvManager loads environment variables from an .env file") {
         CHECK(envManager.load_from_file(ENV_FILE_PATH) == true);
     }
 
+    SUBCASE("Environement variable empty not sure 1") {
+        envManager.load_from_file(ENV_FILE_PATH);
+        auto val = envManager.get_value("会意; 會意"); 
 
-    SUBCASE("Retrieve UTF-8 environment variables") {
+        CHECK(val.has_value());
+        CHECK(val.value() == "OK");   
+    }
+
+
+    SUBCASE("Environement variable empty not sure 2") {
         envManager.load_from_file(ENV_FILE_PATH);
         auto db_url = envManager.get_value("會意");
-        
 
-        REQUIRE(db_url.has_value() == true);
+        REQUIRE(db_url.has_value() == false);
         
-        CHECK(*db_url == "OK");
+        CHECK(db_url == std::nullopt);
         
     }
 

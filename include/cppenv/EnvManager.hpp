@@ -9,6 +9,7 @@
 #include <optional>
 #include <type_traits>
 #include <algorithm>
+#include <array>
 
 
 namespace cppenv{
@@ -18,17 +19,19 @@ namespace cppenv{
 
             bool load_from_file(const std::filesystem::path& filename) override {
                 #ifdef _WIN32
-                    FILE* fp = _wfopen(filename.c_str(), L"rb");
-                    if (!fp){
-                        std::wcerr << L"Error opening .env file : " << filename.wstring() << std::endl;
-                        return false;
-                    }
+                FILE* fp = nullptr;
+                
+                if (_wfopen_s(&fp, filename.c_str(), L"rb") != 0 || !fp) {
+                    std::wcerr << L"Error opening .env file: " << filename.wstring() << std::endl;
+                    return false;
+                }
 
                     std::stringstream ss;
                     char buffer[1024];
                     while (fgets(buffer, sizeof(buffer), fp)){ss << buffer;}
                     fclose(fp);
                     parse_env_stream(ss);
+                    
 
                 #else
                     std::ifstream file(filename, std::ios::in | std::ios::binary);
@@ -170,24 +173,69 @@ namespace cppenv{
                 return value;
 
             }
+
             // bug parsing logical : todo fix
+            /*
             void parse_env_stream(std::istream& stream){
                 std::string line;
-                while (std::getline(stream, line)){
-                    line = trim(line);
-                    if (line.empty() || line[0] == '#'){continue;}
 
+                while (std::getline(stream, line)){
+                    
+                    line = trim(line);
+                    
+                    if (line.empty() || line[0] == '#'){continue;}
+                    
+                    
+                    
                     size_t equal_pos = line.find('=');
                     if (equal_pos != std::string::npos){
+                        
                         std::string key = trim(line.substr(0, equal_pos));
                         std::string value = trim(line.substr(equal_pos + 1));
-                        value = remove_inline_comment(value);
+
                         value = strip_quotes(value);
+                        
+                        
 
                         if (env_vars.find(key) == env_vars.end()){
                             ordered_keys.push_back(key);
                         }
 
+                        env_vars[key] = value;
+                    }
+                }
+            }
+            */
+            
+            std::string remove_comments_and_trim(const std::string& line) {
+                bool in_quotes = false;
+                std::string cleaned;
+                for (char c : line) {
+                    if (c == '"' && (cleaned.empty() || cleaned.back() != '\\')) {
+                        in_quotes = !in_quotes;
+                    }
+                    if (!in_quotes && c == '#') break;
+                    cleaned += c;
+                }
+                return trim(cleaned);
+            }
+
+            void parse_env_stream(std::istream& stream) {
+                std::string line;
+                while (std::getline(stream, line)) {
+                    std::string cleaned = remove_comments_and_trim(line);
+                    if (cleaned.empty()){continue;}
+
+                    size_t eq_pos = cleaned.find('=');
+                    if (eq_pos == std::string::npos) {continue;}
+
+                    std::string key = trim(cleaned.substr(0, eq_pos));
+                    std::string value = strip_quotes(trim(cleaned.substr(eq_pos + 1)));
+
+                    if (!key.empty()) {
+                        if (env_vars.find(key) == env_vars.end()){
+                            ordered_keys.push_back(key);
+                        }
                         env_vars[key] = value;
                     }
                 }
