@@ -13,9 +13,9 @@ echo Creating the build folder...
 mkdir build
 
 cd build
-cmake -G "MinGW Makefiles" ..
-cmake --build .
-ctest --output-on-failure
+cmake -G "Visual Studio 18 2026" ..
+cmake --build . --config Debug
+ctest --output-on-failure -C Debug
 
 pause
 
