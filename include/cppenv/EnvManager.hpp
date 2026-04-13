@@ -17,32 +17,20 @@ namespace cppenv{
     class EnvManager : public IEnvManager {
         public:
 
-            bool load_from_file(const std::filesystem::path& filename) override {
-                #ifdef _WIN32
-                FILE* fp = nullptr;
-                
-                if (_wfopen_s(&fp, filename.c_str(), L"rb") != 0 || !fp) {
-                    std::wcerr << L"Error opening .env file: " << filename.wstring() << std::endl;
+            bool load_from_file(const std::filesystem::path& filename) override{
+
+                if (!std::filesystem::exists(filename)){
+                    std::cerr << "File does not exist: " << filename << std::endl;
                     return false;
                 }
 
-                    std::stringstream ss;
-                    char buffer[1024];
-                    while (fgets(buffer, sizeof(buffer), fp)){ss << buffer;}
-                    fclose(fp);
-                    parse_env_stream(ss);
-                    
+                std::ifstream file(filename, std::ios::in | std::ios::binary);
+                if (!file.is_open()){
+                    std::cerr << "Error opening .env file: " << filename << std::endl;
+                    return false;
+                }
 
-                #else
-                    std::ifstream file(filename, std::ios::in | std::ios::binary);
-                    if (!file.is_open()){
-                        std::cerr << "Error opening .env file : " << filename.string() << std::endl;
-                        return false;
-                    }
-
-                    parse_env_stream(file);
-                #endif
-
+                parse_env_stream(file);
                 return true;
             }
 
