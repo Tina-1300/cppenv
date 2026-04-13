@@ -57,11 +57,6 @@ namespace cppenv{
                 return get_value_as<T>(std::string(key));
             }
 
-            /*
-            template<typename T, typename std::enable_if<!std::is_same_v<T, std::string>, int>::type = 0>
-                std::optional<T> operator[](const std::string& key) const {
-                return get_value_as<T>(key);
-            }*/
 
             template<typename T>
             std::optional<T> get_value_as(const std::string& key) const {
@@ -100,17 +95,6 @@ namespace cppenv{
                 }
 
             }
-
-            /* std::vector<std::string> names() const override {
-                std::vector<std::string> keys;
-                keys.reserve(env_vars.size());
-
-                for (const auto& kv : env_vars){
-                    keys.push_back(kv.first);
-                }
-
-                return keys;
-            }*/
 
             std::vector<std::string> names() const override {
                 return ordered_keys;
@@ -163,38 +147,6 @@ namespace cppenv{
 
             }
 
-            // bug parsing logical : todo fix
-            /*
-            void parse_env_stream(std::istream& stream){
-                std::string line;
-
-                while (std::getline(stream, line)){
-                    
-                    line = trim(line);
-                    
-                    if (line.empty() || line[0] == '#'){continue;}
-                    
-                    
-                    
-                    size_t equal_pos = line.find('=');
-                    if (equal_pos != std::string::npos){
-                        
-                        std::string key = trim(line.substr(0, equal_pos));
-                        std::string value = trim(line.substr(equal_pos + 1));
-
-                        value = strip_quotes(value);
-                        
-                        
-
-                        if (env_vars.find(key) == env_vars.end()){
-                            ordered_keys.push_back(key);
-                        }
-
-                        env_vars[key] = value;
-                    }
-                }
-            }
-            */
             
             std::string remove_comments_and_trim(const std::string& line) {
                 bool in_quotes = false;

@@ -18,7 +18,7 @@ function(add_tests test_name test_source)
     add_test(NAME ${test_name} COMMAND ${test_name})
 endfunction()
 
-
+add_tests(test_loader test_loader.cpp)
 add_tests(test_env_manager test_env_manager.cpp)
 add_tests(test_unicode test_unicode.cpp)
 add_tests(test_UTF-8_file_key test_UTF-8_file_key.cpp)
