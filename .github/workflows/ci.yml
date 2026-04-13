@@ -2,9 +2,31 @@ name: CI - Multi-OS Unit Tests
 
 on:
   push:
-    branches: [ dev, main ]
+    branches:
+      - main                # production 
+      - dev                 # branche de devloppement 
+      - 'feat/**'           # Nouvelles fonctionnalités
+      - 'feature/**'        # Nouvelles fonctionnalités
+      - 'fix/**'            # Correction de bugs
+      - 'bugfix/**'         # Correction de bugs
+      - 'refact/**'         # Refactoring 
+      - 'refactor/**'       # Refactoring 
+      - 'hotfix/**'         # Corrections urgentes en production
+      - 'test/**'           # Ajout ou modification de tests
+      - 'tests/**'          # Ajout ou modification de tests
+      - 'ci/**'             # Modifications du CI/CD (GitHub Actions, etc.)
+      - 'chore/**'          # tache de maintenance (dependance, configuration, etc.)
+      - 'release/**'        # Branches de préparation de release (optionnel))
+
   pull_request:
-    branches: [ dev, main ]
+    branches:      
+      - main
+      - dev
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  checks: write
 
 jobs:
   build-and-test:
