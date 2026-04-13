@@ -2,20 +2,7 @@
 
 #include "./IEnvManager.hpp"
 #include "./EnvManager.hpp"
-
-namespace cppenv::type{
-
-    using OptString = std::optional<std::string>;
-    using OptInt = std::optional<int>;
-    using OptFloat = std::optional<float>;
-    using OptDouble = std::optional<double>;
-    using OptUInt = std::optional<unsigned int>;
-    using OptSize_t = std::optional<size_t>;
-    using OptChar = std::optional<char>;
-    using OptBool = std::optional<bool>;
-
-
-}
+#include "./types.hpp"
 
 namespace cppenv::convert_type{
 

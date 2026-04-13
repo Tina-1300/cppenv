@@ -9,6 +9,7 @@
 #include <optional>
 #include <type_traits>
 #include <algorithm>
+#include <array>
 
 
 namespace cppenv{
@@ -16,30 +17,20 @@ namespace cppenv{
     class EnvManager : public IEnvManager {
         public:
 
-            bool load_from_file(const std::filesystem::path& filename) override {
-                #ifdef _WIN32
-                    FILE* fp = _wfopen(filename.c_str(), L"rb");
-                    if (!fp){
-                        std::wcerr << L"Error opening .env file : " << filename.wstring() << std::endl;
-                        return false;
-                    }
+            bool load_from_file(const std::filesystem::path& filename) override{
 
-                    std::stringstream ss;
-                    char buffer[1024];
-                    while (fgets(buffer, sizeof(buffer), fp)){ss << buffer;}
-                    fclose(fp);
-                    parse_env_stream(ss);
+                if (!std::filesystem::exists(filename)){
+                    std::cerr << "File does not exist: " << filename << std::endl;
+                    return false;
+                }
 
-                #else
-                    std::ifstream file(filename, std::ios::in | std::ios::binary);
-                    if (!file.is_open()){
-                        std::cerr << "Error opening .env file : " << filename.string() << std::endl;
-                        return false;
-                    }
+                std::ifstream file(filename, std::ios::in | std::ios::binary);
+                if (!file.is_open()){
+                    std::cerr << "Error opening .env file: " << filename << std::endl;
+                    return false;
+                }
 
-                    parse_env_stream(file);
-                #endif
-
+                parse_env_stream(file);
                 return true;
             }
 
@@ -110,10 +101,25 @@ namespace cppenv{
 
             }
 
+            /* std::vector<std::string> names() const override {
+                std::vector<std::string> keys;
+                keys.reserve(env_vars.size());
+
+                for (const auto& kv : env_vars){
+                    keys.push_back(kv.first);
+                }
+
+                return keys;
+            }*/
+
+            std::vector<std::string> names() const override {
+                return ordered_keys;
+            }
 
         private:
 
             std::unordered_map<std::string, std::string> env_vars;
+            std::vector<std::string> ordered_keys;
 
             static std::string trim(const std::string& str){
                 
@@ -132,7 +138,7 @@ namespace cppenv{
                 for (size_t i = 0; i < value.size(); ++i){
                     char c = value[i];
 
-                    if (c == '"') in_quotes = !in_quotes;
+                    if (c == '"' ) in_quotes = !in_quotes; 
 
                     if(!in_quotes && c == '#') break;
 
@@ -144,10 +150,12 @@ namespace cppenv{
 
             }
 
-
+            // fix bug " and '
             static std::string strip_quotes(const std::string& value){
 
-                if (value.size() >= 2 && (value.front() == '"' && value.back() == '"')){
+                if (value.size() >= 2 && (value.front() == '"' && value.back() == '"' || 
+                    value.front() == '\'' && value.back() == '\'')){
+
                     return value.substr(1, value.size() - 2);
                 }
 
@@ -155,18 +163,68 @@ namespace cppenv{
 
             }
 
+            // bug parsing logical : todo fix
+            /*
             void parse_env_stream(std::istream& stream){
                 std::string line;
-                while (std::getline(stream, line)){
-                    line = trim(line);
-                    if (line.empty() || line[0] == '#'){continue;}
 
+                while (std::getline(stream, line)){
+                    
+                    line = trim(line);
+                    
+                    if (line.empty() || line[0] == '#'){continue;}
+                    
+                    
+                    
                     size_t equal_pos = line.find('=');
                     if (equal_pos != std::string::npos){
+                        
                         std::string key = trim(line.substr(0, equal_pos));
                         std::string value = trim(line.substr(equal_pos + 1));
-                        value = remove_inline_comment(value);
+
                         value = strip_quotes(value);
+                        
+                        
+
+                        if (env_vars.find(key) == env_vars.end()){
+                            ordered_keys.push_back(key);
+                        }
+
+                        env_vars[key] = value;
+                    }
+                }
+            }
+            */
+            
+            std::string remove_comments_and_trim(const std::string& line) {
+                bool in_quotes = false;
+                std::string cleaned;
+                for (char c : line) {
+                    if (c == '"' && (cleaned.empty() || cleaned.back() != '\\')) {
+                        in_quotes = !in_quotes;
+                    }
+                    if (!in_quotes && c == '#') break;
+                    cleaned += c;
+                }
+                return trim(cleaned);
+            }
+
+            void parse_env_stream(std::istream& stream) {
+                std::string line;
+                while (std::getline(stream, line)) {
+                    std::string cleaned = remove_comments_and_trim(line);
+                    if (cleaned.empty()){continue;}
+
+                    size_t eq_pos = cleaned.find('=');
+                    if (eq_pos == std::string::npos) {continue;}
+
+                    std::string key = trim(cleaned.substr(0, eq_pos));
+                    std::string value = strip_quotes(trim(cleaned.substr(eq_pos + 1)));
+
+                    if (!key.empty()) {
+                        if (env_vars.find(key) == env_vars.end()){
+                            ordered_keys.push_back(key);
+                        }
                         env_vars[key] = value;
                     }
                 }

@@ -2,6 +2,7 @@
 #include "../dep/doctest.h"
 
 #include <iostream>
+#include <array>
 #include "../include/cppenv/cppenv.hpp"
 
 using namespace cppenv::type;
@@ -42,6 +43,46 @@ TEST_CASE("EnvManager loads environment variables from an .env file") {
 
         REQUIRE(netflix_token.has_value() == true);
         CHECK(*netflix_token == "sqdfjshjusdf67");
+    }
+
+    SUBCASE("method 2 to return list of env names"){
+        envManager.load_from_file(ENV_FILE_PATH);
+        std::vector<std::string> l = envManager.names();
+
+        std::array<const char*, 6> expected = {
+            "DATABASE_URL",
+            "TELEGRAM_TOKEN",
+            "DISCORD_TOKEN",
+            "NETFLIX_TOKEN",
+            "SERVER_PORT",
+            "BUILD_RELEASE"
+        };
+
+        for (size_t i = 0; i < expected.size(); i++){
+            CHECK(expected.at(i) == l.at(i));
+        }
+        
+    }
+
+    SUBCASE("method to return list of env names"){
+        envManager.load_from_file(ENV_FILE_PATH);
+        std::vector<std::string> l = envManager.names();
+
+        std::vector<std::string> expected = {
+            "DATABASE_URL",
+            "TELEGRAM_TOKEN",
+            "DISCORD_TOKEN",
+            "NETFLIX_TOKEN",
+            "SERVER_PORT",
+            "BUILD_RELEASE"
+        };
+
+        CHECK(l.size() == expected.size());
+
+        for (const auto& name : expected){
+            CHECK(std::find(l.begin(), l.end(), name) != l.end());
+        }
+
     }
 
     SUBCASE("Accessing a bool environment variable with the [] operator"){

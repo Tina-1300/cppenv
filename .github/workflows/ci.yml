@@ -2,65 +2,103 @@ name: CI - Multi-OS Unit Tests
 
 on:
   push:
-    branches: [ dev, main ]
+    branches:
+      - main                # production 
+      - dev                 # branche de devloppement 
+      - 'feat/**'           # Nouvelles fonctionnalités
+      - 'feature/**'        # Nouvelles fonctionnalités
+      - 'fix/**'            # Correction de bugs
+      - 'bugfix/**'         # Correction de bugs
+      - 'refact/**'         # Refactoring 
+      - 'refactor/**'       # Refactoring 
+      - 'hotfix/**'         # Corrections urgentes en production
+      - 'test/**'           # Ajout ou modification de tests
+      - 'tests/**'          # Ajout ou modification de tests
+      - 'ci/**'             # Modifications du CI/CD (GitHub Actions, etc.)
+      - 'chore/**'          # tache de maintenance (dependance, configuration, etc.)
+      - 'release/**'        # Branches de préparation de release (optionnel))
+
   pull_request:
-    branches: [ dev, main ]
+    branches:      
+      - main
+      - dev
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  checks: write
 
 jobs:
   build-and-test:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows-latest, ubuntu-latest, macos-latest]
-      fail-fast: false  
+        os:
+          - windows-2025-vs2026   # Visual Studio 2026
+          - ubuntu-latest         # GCC
+          - macos-latest          # Apple Clang
+      fail-fast: false
 
     steps:
+      - uses: actions/checkout@v4
 
-    - uses: actions/checkout@v4
+      # ====================== Windows - Visual Studio 18 2026 ======================
+      - name: Configure CMake (Windows - VS 2026)
+        if: matrix.os == 'windows-2025-vs2026'
+        run: |
+          cmake -S . -B build `
+            -G "Visual Studio 18 2026" `
+            -A x64 `
+            -DCMAKE_BUILD_TYPE=Release
 
+      - name: Build (Windows - VS 2026)
+        if: matrix.os == 'windows-2025-vs2026'
+        run: cmake --build build --config Release -- /m
 
-    - name: Setup MSYS2 (Windows)
-      if: matrix.os == 'windows-latest'
-      uses: msys2/setup-msys2@v2
-      with:
-        msystem: MINGW64
-        install: >-
-          mingw-w64-x86_64-toolchain
-          mingw-w64-x86_64-cmake
-          mingw-w64-x86_64-make
-        update: true
-        path-type: minimal
+      - name: Test (Windows - VS 2026)
+        if: matrix.os == 'windows-2025-vs2026'
+        working-directory: build
+        run: ctest -C Release --output-on-failure
 
+      # ====================== Linux - GCC ======================
+      - name: Install dependencies (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential cmake
 
-    - name: Add MSYS2 MinGW to PATH (Windows)
-      if: matrix.os == 'windows-latest'
-      run: echo "C:/msys64/mingw64/bin" >> $GITHUB_PATH
+      - name: Configure CMake (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          cmake -S . -B build \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_CXX_FLAGS="-Wall -Wextra -Wpedantic"
 
+      - name: Build (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: cmake --build build -j 2
 
-    - name: Install dependencies (Linux)
-      if: matrix.os == 'ubuntu-latest'
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y build-essential cmake
+      - name: Test (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        working-directory: build
+        run: ctest --output-on-failure -j 2
 
+      # ====================== macOS - Clang ======================
+      - name: Install dependencies (macOS)
+        if: matrix.os == 'macos-latest'
+        run: brew install cmake
 
-    - name: Install dependencies (macOS)
-      if: matrix.os == 'macos-latest'
-      run: |
-        brew install cmake
+      - name: Configure CMake (macOS)
+        if: matrix.os == 'macos-latest'
+        run: |
+          cmake -S . -B build \
+            -DCMAKE_BUILD_TYPE=Release
 
+      - name: Build (macOS)
+        if: matrix.os == 'macos-latest'
+        run: cmake --build build -j 2
 
-    - name: Configure CMake
-      run: |
-        mkdir build
-        cd build
-        cmake .. ${{ matrix.os == 'windows-latest' && '-G "MinGW Makefiles"' || '' }} -DCMAKE_BUILD_TYPE=Release
-
-
-    - name: Build
-      working-directory: build
-      run: cmake --build . --config Release -j 2
-
-    - name: Test
-      working-directory: build
-      run: ctest -C Release --output-on-failure
+      - name: Test (macOS)
+        if: matrix.os == 'macos-latest'
+        working-directory: build
+        run: ctest --output-on-failure -j 2
