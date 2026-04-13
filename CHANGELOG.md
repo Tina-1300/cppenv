@@ -25,3 +25,13 @@
   - Ensures `.env` files with names like `文件名.env` load correctly.
 
 
+## [1.3.0] - 2026-04-13
+### Fixed
+
+- (Windows, Linux, Macos) Correct handling of Unicode filenames in `load_from_file`
+  - Fixed compatibility with MSVC and clang and gcc.
+  - Ensures `.env` files with names like `文件名.env` load correctly.
+
+- (Windows) Remove compilator mingw
+
+- (Windows, linux, macos ) add compilator MSVC, GCC, CLANG 
