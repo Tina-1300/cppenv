@@ -7,7 +7,13 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-enable_testing()
+option(TEST "unit test active default" ON) # default unit test active
 
 
-add_subdirectory(tests)
+if (TEST)
+    enable_testing()
+
+
+    add_subdirectory(tests)
+endif()
+
