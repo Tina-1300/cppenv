@@ -11,9 +11,6 @@ function(add_tests test_name test_source)
         ${CMAKE_SOURCE_DIR}/include
     )
 
-    #target_compile_definitions(${test_name} PRIVATE
-    #   ENV_FILE_PATH="${CMAKE_SOURCE_DIR}/tests/.env"
-    #)
 
     add_test(NAME ${test_name} COMMAND ${test_name})
 endfunction()
