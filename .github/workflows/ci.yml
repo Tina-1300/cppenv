@@ -1,0 +1,101 @@
+name: CI - Multi-OS Unit Tests
+
+on:
+  push:
+    branches:
+      - main                # production 
+      - 'feat/**'           # Nouvelles fonctionnalités
+      - 'feature/**'        # Nouvelles fonctionnalités
+      - 'fix/**'            # Correction de bugs
+      - 'bugfix/**'         # Correction de bugs
+      - 'refact/**'         # Refactoring 
+      - 'refactor/**'       # Refactoring 
+      - 'hotfix/**'         # Corrections urgentes en production
+      - 'test/**'           # Ajout ou modification de tests
+      - 'tests/**'          # Ajout ou modification de tests
+      - 'ci/**'             # Modifications du CI/CD (GitHub Actions, etc.)
+      - 'chore/**'          # tache de maintenance (dependance, configuration, etc.)
+
+  pull_request:
+    branches:      
+      - main
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  checks: write
+
+jobs:
+  build-and-test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os:
+          - windows-2025-vs2026   # Visual Studio 2026
+          - ubuntu-latest         # GCC
+          - macos-latest          # Apple Clang
+      fail-fast: false
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # ====================== Windows - Visual Studio 18 2026 ======================
+      - name: Configure CMake (Windows - VS 2026)
+        if: matrix.os == 'windows-2025-vs2026'
+        run: |
+          cmake -S . -B build `
+            -G "Visual Studio 18 2026" `
+            -A x64 `
+            -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build (Windows - VS 2026)
+        if: matrix.os == 'windows-2025-vs2026'
+        run: cmake --build build --config Release -- /m
+
+      - name: Test (Windows - VS 2026)
+        if: matrix.os == 'windows-2025-vs2026'
+        working-directory: build
+        run: ctest -C Release --output-on-failure
+
+      # ====================== Linux - GCC ======================
+      - name: Install dependencies (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential cmake
+
+      - name: Configure CMake (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          cmake -S . -B build \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_CXX_FLAGS="-Wall -Wextra -Wpedantic"
+
+      - name: Build (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: cmake --build build -j 2
+
+      - name: Test (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        working-directory: build
+        run: ctest --output-on-failure -j 2
+
+      # ====================== macOS - Clang ======================
+      - name: Install dependencies (macOS)
+        if: matrix.os == 'macos-latest'
+        run: brew install cmake
+
+      - name: Configure CMake (macOS)
+        if: matrix.os == 'macos-latest'
+        run: |
+          cmake -S . -B build \
+            -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build (macOS)
+        if: matrix.os == 'macos-latest'
+        run: cmake --build build -j 2
+
+      - name: Test (macOS)
+        if: matrix.os == 'macos-latest'
+        working-directory: build
+        run: ctest --output-on-failure -j 2

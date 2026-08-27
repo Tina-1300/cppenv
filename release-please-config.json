@@ -1,0 +1,13 @@
+{
+  "release-type": "simple",
+  "include-v-in-tag": true,
+  "changelog-path": "CHANGELOG.md",
+  "packages": {
+    ".": {
+      "release-type": "simple",
+      "extra-files": [
+        "CMakeLists.txt"
+      ]
+    }
+  }
+}

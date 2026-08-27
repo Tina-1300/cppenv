@@ -1,0 +1,210 @@
+{
+    "version": 6,
+
+    "cmakeMinimumRequired": {
+        "major": 3,
+        "minor": 25,
+        "patch": 0
+    },
+
+    "configurePresets": [
+        {
+            "name": "msvc-debug",
+            "displayName": "MSVC Debug",
+            "generator": "Visual Studio 18 2026",
+            "binaryDir": "${sourceDir}/build/msvc-debug",
+            "architecture": {
+                "value": "x64",
+                "strategy": "external"
+            },
+            "cacheVariables": {
+                "CPPENV_BUILD_TESTS": "ON"
+            }
+        },
+
+        {
+            "name": "msvc-release",
+            "displayName": "MSVC Release",
+            "generator": "Visual Studio 18 2026",
+            "binaryDir": "${sourceDir}/build/msvc-release",
+            "architecture": {
+                "value": "x64",
+                "strategy": "external"
+            },
+            "cacheVariables": {
+                "CPPENV_BUILD_TESTS": "ON"
+            }
+        },
+
+        {
+            "name": "ninja-clang-cl-debug",
+            "displayName": "Ninja Clang-cl Debug",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build/ninja-clang-cl-debug",
+            "cacheVariables": {
+                
+                "CMAKE_CXX_COMPILER": "clang-cl",
+                "CMAKE_BUILD_TYPE": "Debug",
+                "CPPENV_BUILD_TESTS": "ON"
+            }
+        },
+
+        {
+            "name": "ninja-clang-cl-release",
+            "displayName": "Ninja Clang-cl Release",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build/ninja-clang-cl-release",
+            "cacheVariables": {
+              
+                "CMAKE_CXX_COMPILER": "clang-cl",
+                "CMAKE_BUILD_TYPE": "Release",
+                "CPPENV_BUILD_TESTS": "ON"
+            }
+        }
+
+
+    ],
+
+    "buildPresets": [
+        {
+            "name": "msvc-debug",
+            "configurePreset": "msvc-debug",
+            "configuration": "Debug"
+        },
+
+        {
+            "name": "msvc-release",
+            "configurePreset": "msvc-release",
+            "configuration": "Release"
+        },
+
+        {
+            "name": "ninja-clang-cl-debug",
+            "configurePreset": "ninja-clang-cl-debug"
+        },
+
+        {
+            "name": "ninja-clang-cl-release",
+            "configurePreset": "ninja-clang-cl-release"
+        }
+
+    ],
+
+    "testPresets": [
+        {
+            "name": "msvc-debug",
+            "configurePreset": "msvc-debug",
+            "configuration": "Debug",
+            "output": {
+                "outputOnFailure": true
+            }
+        },
+
+        {
+            "name": "msvc-release",
+            "configurePreset": "msvc-release",
+            "configuration": "Release",
+            "output": {
+                "outputOnFailure": true
+            }
+        },
+
+        {
+            "name": "ninja-clang-cl-debug",
+            "configurePreset": "ninja-clang-cl-debug",
+            "output": {
+                "outputOnFailure": true
+            }
+        },
+
+        {
+            "name": "ninja-clang-cl-release",
+            "configurePreset": "ninja-clang-cl-release",
+            "output": {
+                "outputOnFailure": true
+            }
+        }
+
+    ],
+
+    "workflowPresets": [
+        {
+            "name": "msvc-debug",
+            "displayName": "MSVC Debug - Full",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "msvc-debug"
+                },
+                {
+                    "type": "build",
+                    "name": "msvc-debug"
+                },
+                {
+                    "type": "test",
+                    "name": "msvc-debug"
+                }
+            ]
+        },
+
+        {
+            "name": "msvc-release",
+            "displayName": "MSVC Release - Full",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "msvc-release"
+                },
+                {
+                    "type": "build",
+                    "name": "msvc-release"
+                },
+                {
+                    "type": "test",
+                    "name": "msvc-release"
+                }
+            ]
+        }, 
+
+
+        {
+            "name": "ninja-clang-cl-debug",
+            "displayName": "Ninja Clang-cl Debug - Full",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "ninja-clang-cl-debug"
+                },
+                {
+                    "type": "build",
+                    "name": "ninja-clang-cl-debug"
+                },
+                {
+                    "type": "test",
+                    "name": "ninja-clang-cl-debug"
+                }
+            ]
+        },
+
+        {
+            "name": "ninja-clang-cl-release",
+            "displayName": "Ninja Clang-cl Release - Full",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "ninja-clang-cl-release"
+                },
+                {
+                    "type": "build",
+                    "name": "ninja-clang-cl-release"
+                },
+                {
+                    "type": "test",
+                    "name": "ninja-clang-cl-release"
+                }
+            ]
+        }
+
+
+    ]
+}
