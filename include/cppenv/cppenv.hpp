@@ -6,7 +6,6 @@
 #include <filesystem>
 #include <fstream>
 #include <optional>
-#include <sstream>
 #include <string>
 #include <string_view>
 #include <type_traits>
@@ -470,10 +469,6 @@ private:
         return std::nullopt;
     }
 };
-
-// ============================================================================
-// Alias pratiques
-// ============================================================================
 
 
 } // namespace cppenv
