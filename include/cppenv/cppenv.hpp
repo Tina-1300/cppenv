@@ -116,10 +116,17 @@ private:
     
     void parse_stream(std::istream& stream) {
         std::string line;
+        bool first_line = true;
         while (std::getline(stream, line)) {
-            // Supprime le BOM éventuel en début de fichier
-            if (!vars_.empty() == false && line.starts_with("\xEF\xBB\xBF")) {
-                line.erase(0, 3);
+            
+            if (first_line) {
+                first_line = false;
+
+                constexpr std::string_view utf8_bom = "\xEF\xBB\xBF";
+
+                if (line.starts_with(utf8_bom)) {
+                    line.erase(0, utf8_bom.size());
+                }
             }
 
             auto cleaned = remove_comment_and_trim(line);
