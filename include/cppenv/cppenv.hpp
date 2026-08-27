@@ -474,16 +474,6 @@ private:
 // ============================================================================
 // Alias pratiques
 // ============================================================================
-namespace types {
-    using String  = std::optional<std::string>;
-    using Bool    = std::optional<bool>;
-    using Int     = std::optional<int>;
-    using UInt    = std::optional<unsigned int>;
-    using Long    = std::optional<long>;
-    using ULong   = std::optional<unsigned long>;
-    using SizeT   = std::optional<std::size_t>;
-    using Float   = std::optional<float>;
-    using Double  = std::optional<double>;
-}
+
 
 } // namespace cppenv
