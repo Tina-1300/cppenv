@@ -77,6 +77,14 @@ class EnvManager {
             return get_as<T>(key);
         }
 
+        template <typename T>
+        [[nodiscard]] T get_or(std::string_view key, T default_value) const {
+            
+            const auto value = get_as<T>(key);
+
+            return value.value_or(std::move(default_value));
+        }
+
 
 
         // Liste ordonnée des clés

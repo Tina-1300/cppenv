@@ -11,6 +11,7 @@ add_executable(cppenv_tests
     test_converter.cpp
     test_get.cpp
     test_get_as.cpp
+    test_get_or.cpp
     test_operator.cpp
     test_unicode.cpp
     test_UTF-8_file_key.cpp
