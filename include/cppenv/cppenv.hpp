@@ -1,32 +1,23 @@
 #pragma once
 
+#include "converter.hpp"
 #include "parser.hpp"
 #include "expander.hpp"
 
-#include <algorithm>
-#include <charconv>
 #include <filesystem>
 #include <fstream>
+#include <istream>
 #include <optional>
 #include <string>
 #include <string_view>
-#include <type_traits>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
+
+
+
 namespace cppenv {
-
-
-
-template <typename T>
-concept Arithmetic =
-    std::is_arithmetic_v<T> &&
-    !std::is_same_v<T, bool>;
-
-template <typename T>
-concept StringLike =
-    std::is_convertible_v<T, std::string_view>;
-
 
 
 class EnvManager {
@@ -78,7 +69,7 @@ class EnvManager {
                 return std::nullopt;
             }
 
-            return convert<T>(*opt);
+            return detail::CppenvConverter::convert<T>(*opt);
         }
 
         template <typename T>
@@ -150,53 +141,6 @@ class EnvManager {
         }
 
 
-        // Conversion
-        template <typename T>
-        static std::optional<T> convert(const std::string& str) {
-            if constexpr (std::is_same_v<T, std::string>) {
-                return str;
-            }else if constexpr (std::is_same_v<T, bool>) {
-                return to_bool(str);
-            }else if constexpr (Arithmetic<T>) {
-                return to_number<T>(str);
-            }else {
-                static_assert(sizeof(T) == 0,"Type non supporté par get_as<T>()");
-
-                return std::nullopt;
-            }
-        }
-
-        static std::optional<bool> to_bool(std::string_view sv) {
-            std::string s(sv);
-
-            std::transform(s.begin(), s.end(), s.begin(), [](unsigned char c) {
-                    return static_cast<char>(std::tolower(c));
-                }
-            );
-
-            if (s == "true" || s == "1" || s == "yes" || s == "on") {
-                return true;
-            }
-
-            if (s == "false" || s == "0" || s == "no" || s == "off") {
-                return false;
-            }
-
-            return std::nullopt;
-        }
-
-        template <Arithmetic T>
-        static std::optional<T> to_number(std::string_view sv) {
-            T value{};
-
-            auto [ptr, ec] = std::from_chars(sv.data(), sv.data() + sv.size(), value );
-
-            if (ec == std::errc{} && ptr == sv.data() + sv.size()) {
-                return value;
-            }
-
-            return std::nullopt;
-        }
 };
 
 
