@@ -1,6 +1,7 @@
 #pragma once
 
 #include "parser.hpp"
+#include "expander.hpp"
 
 #include <algorithm>
 #include <charconv>
@@ -11,7 +12,6 @@
 #include <string_view>
 #include <type_traits>
 #include <unordered_map>
-#include <unordered_set>
 #include <vector>
 
 namespace cppenv {
@@ -54,8 +54,7 @@ class EnvManager {
 
 
         // Accès basique
-        [[nodiscard]]
-        std::optional<std::string> get(std::string_view key) const {
+        [[nodiscard]] std::optional<std::string> get(std::string_view key) const {
             auto it = vars_.find(std::string(key));
 
             if (it == vars_.end()) {
@@ -65,16 +64,14 @@ class EnvManager {
             return it->second;
         }
 
-        [[nodiscard]]
-        std::optional<std::string> operator[](std::string_view key) const {
+        [[nodiscard]] std::optional<std::string> operator[](std::string_view key) const {
             return get(key);
         }
 
 
 
         template <typename T>
-        [[nodiscard]]
-        std::optional<T> get_as(std::string_view key) const {
+        [[nodiscard]] std::optional<T> get_as(std::string_view key) const {
             auto opt = get(key);
 
             if (!opt) {
@@ -85,33 +82,28 @@ class EnvManager {
         }
 
         template <typename T>
-        [[nodiscard]]
-        std::optional<T> operator[](std::string_view key) const {
+        [[nodiscard]] std::optional<T> operator[](std::string_view key) const {
             return get_as<T>(key);
         }
 
 
 
         // Liste ordonnée des clés
-        [[nodiscard]]
-        const std::vector<std::string>& keys() const noexcept {
+        [[nodiscard]] const std::vector<std::string>& keys() const noexcept {
             return ordered_keys_;
         }
 
         // Nombre de variables
-        [[nodiscard]]
-        std::size_t size() const noexcept {
+        [[nodiscard]] std::size_t size() const noexcept {
             return vars_.size();
         }
 
-        [[nodiscard]]
-        bool empty() const noexcept {
+        [[nodiscard]] bool empty() const noexcept {
             return vars_.empty();
         }
 
         // Vérifie l'existence d'une clé
-        [[nodiscard]]
-        bool contains(std::string_view key) const {
+        [[nodiscard]] bool contains(std::string_view key) const {
             return vars_.contains(std::string(key));
         }
 
@@ -129,7 +121,7 @@ class EnvManager {
         void load_from_stream(std::istream& stream){
             clear();
             parse_stream(stream);
-            resolve_all_variables();
+            expand_variables();
         }
 
         // Parsing
@@ -150,137 +142,11 @@ class EnvManager {
             }
         }
 
-
         // Variable expansion
-        std::string expand_variables(std::string_view value, std::unordered_set<std::string>& resolving) {
-            
-            std::string result;
-            
-            result.reserve(value.size());
+        void expand_variables(){
 
-            for (std::size_t i = 0; i < value.size(); ++i) {
-
-                // Caractère normal
-
-                if (value[i] != '$') {
-                    result += value[i];
-                    continue;
-                }
-
-
-                // ${VARIABLE}
-
-                if (i + 1 < value.size() && value[i + 1] == '{') {
-
-                    const std::size_t end = value.find('}', i + 2);
-
-                    if (end == std::string_view::npos) {
-                        result += '$';
-                        continue;
-                    }
-
-                    std::string key(value.substr(i + 2, end - i - 2));
-
-                    auto it = vars_.find(key);
-
-                    if (it != vars_.end()) {
-                        result += resolve_variable(key, resolving);
-                    } else {
-                        result.append(value.substr(i, end - i + 1));
-                    }
-
-                    i = end;
-                    continue;
-                }
-
-
-                // $VARIABLE
-                if (i + 1 < value.size()) {
-
-                    const unsigned char next = static_cast<unsigned char>(value[i + 1]);
-
-                    if (std::isalpha(next) || value[i + 1] == '_') {
-
-                        std::size_t end = i + 1;
-
-                        while (end < value.size()) {
-
-                            const unsigned char c = static_cast<unsigned char>(value[end]);
-
-                            if (!std::isalnum(c) && value[end] != '_') {
-                                break;
-                            }
-
-                            ++end;
-                        }
-
-                        std::string key(value.substr(i + 1, end - i - 1));
-
-                        auto it = vars_.find(key);
-
-                        if (it != vars_.end()) {
-
-                            result += resolve_variable(key, resolving);
-
-                        }else {
-                            result.append(value.substr(i, end - i));
-                        }
-
-                        i = end - 1;
-                        continue;
-                    }
-                }
-
-                // '$' seul
-
-                result += '$';
-            }
-
-            return result;
-        }
-
-
-        // Variable resolution
-        void resolve_all_variables() {
-
-            for (const auto& key : ordered_keys_) {
-
-                std::unordered_set<std::string> resolving;
-
-                resolve_variable(key, resolving);
-            }
-        }
-
-        std::string resolve_variable(const std::string& key, std::unordered_set<std::string>& resolving) {
-
-            auto it = vars_.find(key);
-
-            if (it == vars_.end()) {
-                return {};
-            }
-
-            // Détection d'une boucle.
-            //
-            // A=${B}
-            // B=${A}
-
-            if (resolving.contains(key)) {
-                return "${" + key + "}";
-            }
-
-            resolving.insert(key);
-
-            std::string resolved =
-                expand_variables(
-                    it->second,
-                    resolving
-                );
-
-            it->second = resolved;
-
-            resolving.erase(key);
-
-            return resolved;
+            detail::VariableExpander expander(vars_);
+            expander.resolve_all(ordered_keys_);
         }
 
 
