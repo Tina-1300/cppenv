@@ -42,20 +42,13 @@ class EnvManager {
                 return false;
             }
 
-            clear();
-
-            parse_stream(file);
-
-            resolve_all_variables();
-
+            load_from_stream(file);
             return true;
         }
 
         // Charge depuis un flux (utile pour les tests)
         void load(std::istream& stream) {
-            clear();
-            parse_stream(stream);
-            resolve_all_variables();
+            load_from_stream(stream);
         }
 
 
@@ -133,6 +126,11 @@ class EnvManager {
         std::unordered_map<std::string, std::string> vars_;
         std::vector<std::string> ordered_keys_;
 
+        void load_from_stream(std::istream& stream){
+            clear();
+            parse_stream(stream);
+            resolve_all_variables();
+        }
 
         // Parsing
         void parse_stream(std::istream& stream) {
