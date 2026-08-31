@@ -4,6 +4,7 @@
 #include "parser.hpp"
 #include "expander.hpp"
 
+#include <algorithm>
 #include <filesystem>
 #include <fstream>
 #include <istream>
@@ -13,7 +14,6 @@
 #include <unordered_map>
 #include <utility>
 #include <vector>
-#include <algorithm>
 
 
 
@@ -132,6 +132,22 @@ class EnvManager {
         [[nodiscard]] const std::vector<std::string>& keys() const noexcept {
             return ordered_keys_;
         }
+
+        // Iterators
+        using const_iterator = std::vector<std::string>::const_iterator;
+
+        [[nodiscard]]
+        const_iterator begin() const noexcept {
+            return ordered_keys_.begin();
+        }
+
+        [[nodiscard]]
+        const_iterator end() const noexcept {
+            return ordered_keys_.end();
+        }
+
+
+
 
         // Nombre de variables
         [[nodiscard]] std::size_t size() const noexcept {

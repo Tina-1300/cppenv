@@ -11,6 +11,7 @@ add_executable(cppenv_tests
     test_converter.cpp
     test_set.cpp
     test_erase.cpp
+    test_iterators.cpp
     test_get.cpp
     test_get_as.cpp
     test_get_or.cpp
