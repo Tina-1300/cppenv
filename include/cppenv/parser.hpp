@@ -18,67 +18,109 @@ struct ParsedEntry {
 
 class CppenvParser {
     public:
-        [[nodiscard]]
-        std::vector<ParsedEntry> parse(std::istream& stream) const {
-            std::vector<ParsedEntry> entries;
-
-            std::string line;
-            bool first_line = true;
-
-            while (std::getline(stream, line)){
 
 
-                // UTF-8 BOM
-                if (first_line){
-                    first_line = false;
-                    remove_utf8_bom(line);
-                }
 
+[[nodiscard]]
+    std::vector<ParsedEntry> parse(std::istream& stream) const {
 
-                // Nettoyage de la ligne
-                auto cleaned = remove_comment_and_trim(line);
+        std::vector<ParsedEntry> entries;
 
-                if (cleaned.empty()){
-                    continue;
-                }
+        std::string line;
+        bool first_line = true;
 
+        while (std::getline(stream, line)) {
 
-        
-                const auto separator = cleaned.find('=');
-
-                if (separator == std::string_view::npos){
-                    continue;
-                }
-
-
-                // Séparation clé / valeur
-
-                const auto key_part = cleaned.substr(0, separator);
-
-                const auto value_part = cleaned.substr(separator + 1);
-
-                const auto key_view = trim(key_part);
-
-                const auto value_view = trim(value_part);
-
-
-                if (key_view.empty()){
-                    continue;
-                }
-
-
-                // Construction de l'entrée
-
-                ParsedEntry entry;
-
-                entry.key = key_view;
-                entry.value = unquote(value_view);
-
-                entries.push_back(std::move(entry));
+            // UTF-8 BOM
+            if (first_line) {
+                first_line = false;
+                remove_utf8_bom(line);
             }
 
-            return entries;
+            // Nettoyage de la première ligne.
+            //
+            // On le fait avant de chercher '=' afin de conserver
+            // le comportement existant concernant les commentaires.
+            const auto cleaned = remove_comment_and_trim(line);
+
+            if (cleaned.empty()) {
+                continue;
+            }
+
+            const auto separator = cleaned.find('=');
+
+            if (separator == std::string_view::npos) {
+                continue;
+            }
+
+            // Séparation clé / valeur
+            const auto key_part = cleaned.substr(0, separator);
+            const auto value_part = cleaned.substr(separator + 1);
+
+            const auto key_view = trim(key_part);
+
+            if (key_view.empty()) {
+                continue;
+            }
+
+            std::string value(value_part);
+
+            // Vérifie si la valeur commence par une quote.
+            const auto value_view = trim(value);
+
+            if (is_quoted(value_view)) {
+
+                const char quote = value_view.front();
+
+                // On repart de la valeur nettoyée pour conserver
+                // les espaces autour du contenu comme précédemment.
+                value = std::string(value_view);
+
+                // Si la quote n'est pas fermée sur la première ligne,
+                // on continue à lire jusqu'à trouver la quote fermante.
+                while (!has_closing_quote(value, quote)) {
+
+                    std::string next_line;
+
+                    if (!std::getline(stream, next_line)) {
+                        // Quote non fermée : entrée invalide.
+                        value.clear();
+                        break;
+                    }
+
+                    value += '\n';
+                    value += next_line;
+                }
+
+                if (value.empty()) {
+                    continue;
+                }
+            }
+
+            // Suppression des commentaires.
+            //
+            // Important :
+            // cette fonction reçoit maintenant toute la valeur multiline
+            // d'un seul coup. Elle sait donc que le '#' situé à l'intérieur
+            // des quotes n'est PAS un commentaire.
+            value = remove_comment_and_trim(value);
+
+            // Construction de l'entrée
+            ParsedEntry entry;
+
+            entry.key = key_view;
+            entry.value = unquote(value);
+
+            entries.push_back(std::move(entry));
         }
+
+        return entries;
+    }
+
+
+
+
+
 
     private:
 
@@ -111,6 +153,16 @@ class CppenvParser {
             }
 
             return value;
+        }
+
+        [[nodiscard]] static bool is_quoted(std::string_view value) noexcept {
+
+            if (value.empty()) {
+                return false;
+            }
+
+            return value.front() == '"' ||
+                value.front() == '\'';
         }
 
 
@@ -149,6 +201,43 @@ class CppenvParser {
 
             return std::string(trim(result));
         }
+
+        [[nodiscard]] static bool is_multiline_quoted(std::string_view value) noexcept {
+
+            if (value.size() < 2) {
+                return false;
+            }
+
+            const char quote = value.front();
+
+            return (quote == '"' || quote == '\'') &&
+                value.back() != quote;
+        }
+
+
+        [[nodiscard]] static bool has_closing_quote(std::string_view value, char quote) noexcept {
+
+            if (value.size() < 2) {
+                return false;
+            }
+
+            for (std::size_t i = 1; i < value.size(); ++i) {
+
+                if (value[i] == '\\' && i + 1 < value.size()) {
+                    ++i;
+                    continue;
+                }
+
+                if (value[i] == quote) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+
+
 
         [[nodiscard]] static std::string unquote(std::string_view value) {
 

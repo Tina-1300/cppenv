@@ -189,3 +189,81 @@ TEST_CASE("EnvManager - parsing supports equals signs inside values") {
 }
 
 
+TEST_CASE("EnvManager - parsing supports multiline double quoted values") {
+
+    std::istringstream input(
+        "DESCRIPTION=\"Hello\n"
+        "World\"\n"
+    );
+
+    cppenv::EnvManager env;
+    env.load(input);
+
+    const auto value = env.get("DESCRIPTION");
+
+    REQUIRE(value.has_value());
+    CHECK(*value == "Hello\nWorld");
+}
+
+
+TEST_CASE("EnvManager - parsing supports multiline single quoted values") {
+
+    std::istringstream input(
+        "DESCRIPTION='Hello\n"
+        "World'\n"
+    );
+
+    cppenv::EnvManager env;
+    env.load(input);
+
+    const auto value = env.get("DESCRIPTION");
+
+    REQUIRE(value.has_value());
+    CHECK(*value == "Hello\nWorld");
+}
+
+
+TEST_CASE("EnvManager - parsing preserves # inside multiline double quoted values") {
+
+    std::istringstream input(
+        "MESSAGE=\"Hello\n"
+        "World # still a value\n"
+        "Again\"\n"
+    );
+
+    cppenv::EnvManager env;
+    env.load(input);
+
+    const auto value = env.get("MESSAGE");
+
+    REQUIRE(value.has_value());
+
+    CHECK(*value ==
+        "Hello\n"
+        "World # still a value\n"
+        "Again"
+    );
+}
+
+
+TEST_CASE("EnvManager - parsing preserves # inside multiline single quoted values") {
+
+    std::istringstream input(
+        "MESSAGE='Hello\n"
+        "World # still a value\n"
+        "Again'\n"
+    );
+
+    cppenv::EnvManager env;
+    env.load(input);
+
+    const auto value = env.get("MESSAGE");
+
+    REQUIRE(value.has_value());
+
+    CHECK(*value ==
+        "Hello\n"
+        "World # still a value\n"
+        "Again"
+    );
+}
