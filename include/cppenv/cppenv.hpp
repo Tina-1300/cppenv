@@ -13,6 +13,7 @@
 #include <unordered_map>
 #include <utility>
 #include <vector>
+#include <algorithm>
 
 
 
@@ -65,9 +66,26 @@ class EnvManager {
             }
         }
 
+        [[nodiscard]] bool erase(std::string_view key) {
+
+            const auto erased = vars_.erase(std::string(key));
+
+            if (erased == 0) {
+                return false;
+            }
+
+            const auto it = std::find(ordered_keys_.begin(), ordered_keys_.end(), key);
+
+            if (it != ordered_keys_.end()) {
+                ordered_keys_.erase(it);
+            }
+
+            return true;
+        }
 
 
-        // Accès basique
+
+        // basic access
         [[nodiscard]] std::optional<std::string> get(std::string_view key) const {
             auto it = vars_.find(std::string(key));
 
