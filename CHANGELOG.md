@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.4.0](https://github.com/Tina-1300/cppenv/compare/v0.3.0...v0.4.0) (2026-08-31)
+
+
+### Features
+
+* **cppenv:** add begin and end iterators ([958f456](https://github.com/Tina-1300/cppenv/commit/958f456613eaf60e4d5b293d1760488804931bb1))
+* **cppenv:** add erase method ([ed6a16e](https://github.com/Tina-1300/cppenv/commit/ed6a16e51a6336d4ec0be3295d99c74d2e97bb77))
+* **cppenv:** add set method ([7d141f6](https://github.com/Tina-1300/cppenv/commit/7d141f6464a69b74305d92e8de280a9a5935a1ba))
+
 ## [0.3.0](https://github.com/Tina-1300/cppenv/compare/v0.2.0...v0.3.0) (2026-08-31)
 
 
