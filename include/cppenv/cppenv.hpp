@@ -43,6 +43,29 @@ class EnvManager {
         }
 
 
+        void set(std::string_view key, std::string_view value) {
+            const auto [it, inserted] = vars_.insert_or_assign(
+                std::string(key),
+                std::string(value)
+            );
+
+            if (inserted) {
+                ordered_keys_.emplace_back(it->first);
+            }
+        }
+
+        template <typename T>
+        requires std::is_arithmetic_v<T>
+        void set(std::string_view key, T value) {
+
+            if constexpr (std::is_same_v<T, bool>) {
+                set(key, value ? "true" : "false");
+            } else {
+                set(key, std::to_string(value));
+            }
+        }
+
+
 
         // Accès basique
         [[nodiscard]] std::optional<std::string> get(std::string_view key) const {

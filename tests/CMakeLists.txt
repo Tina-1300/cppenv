@@ -9,6 +9,7 @@ add_executable(cppenv_tests
     test_parsing.cpp
     test_expansion.cpp
     test_converter.cpp
+    test_set.cpp
     test_get.cpp
     test_get_as.cpp
     test_get_or.cpp
