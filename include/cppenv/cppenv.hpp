@@ -5,6 +5,7 @@
 #include "expander.hpp"
 
 #include <algorithm>
+#include <cstdlib>
 #include <filesystem>
 #include <fstream>
 #include <istream>
@@ -65,6 +66,26 @@ class EnvManager {
                 set(key, std::to_string(value));
             }
         }
+
+        void export_to_process() const {
+
+            for (const auto& key : ordered_keys_) {
+
+                const auto it = vars_.find(key);
+
+                if (it == vars_.end()) {
+                    continue;
+                }
+
+                #ifdef _WIN32
+                    _putenv_s(key.c_str(), it->second.c_str());
+                #else
+                    setenv(key.c_str(), it->second.c_str(), 1);
+                #endif
+            }
+        }
+
+
 
         [[nodiscard]] bool erase(std::string_view key) {
 
