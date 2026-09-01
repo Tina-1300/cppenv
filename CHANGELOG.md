@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.0](https://github.com/Tina-1300/cppenv/compare/v0.4.0...v0.5.0) (2026-09-01)
+
+
+### Features
+
+* add process environment export ([0a12e53](https://github.com/Tina-1300/cppenv/commit/0a12e5337452e32094806bb42ab0dc9bba2b19aa))
+
 ## [0.4.0](https://github.com/Tina-1300/cppenv/compare/v0.3.0...v0.4.0) (2026-08-31)
 
 
