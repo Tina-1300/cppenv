@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.23)
 
 project(cppenv
-    VERSION 0.4.0 # x-release-please-version
+    VERSION 0.5.0 # x-release-please-version
     DESCRIPTION "A lightweight header-only C++ environment variable library"
     HOMEPAGE_URL "https://github.com/Tina-1300/cppenv"
     LANGUAGES CXX
