@@ -1,0 +1,59 @@
+name: CI - macOS
+
+on:
+  push:
+    branches:
+      - main
+      - 'feat/**'
+      - 'feature/**'
+      - 'fix/**'
+      - 'bugfix/**'
+      - 'refact/**'
+      - 'refactor/**'
+      - 'hotfix/**'
+      - 'test/**'
+      - 'tests/**'
+      - 'ci/**'
+      - 'chore/**'
+
+  pull_request:
+    branches:
+      - main
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  checks: write
+
+jobs:
+  build-and-test:
+    runs-on: macos-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        build_type:
+          - Debug
+          - Release
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          brew install cmake
+
+      - name: Configure CMake
+        run: |
+          cmake -S . -B build \
+            -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+
+      - name: Build
+        run: |
+          cmake --build build -j 2
+
+      - name: Test
+        working-directory: build
+        run: |
+          ctest --output-on-failure -j 2

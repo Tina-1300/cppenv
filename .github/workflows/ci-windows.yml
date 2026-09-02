@@ -1,0 +1,63 @@
+name: CI - Windows
+
+on:
+  push:
+    branches:
+      - main
+      - 'feat/**'
+      - 'feature/**'
+      - 'fix/**'
+      - 'bugfix/**'
+      - 'refact/**'
+      - 'refactor/**'
+      - 'hotfix/**'
+      - 'test/**'
+      - 'tests/**'
+      - 'ci/**'
+      - 'chore/**'
+
+  pull_request:
+    branches:
+      - main
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  checks: write
+
+jobs:
+  build-and-test:
+    runs-on: windows-2025-vs2026
+
+    strategy:
+      fail-fast: false
+      matrix:
+        build_type:
+          - Debug
+          - Release
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure CMake
+        shell: pwsh
+        run: |
+          cmake -S . -B build `
+            -G "Visual Studio 18 2026" `
+            -A x64
+
+      - name: Build
+        shell: pwsh
+        run: |
+          cmake --build build `
+            --config ${{ matrix.build_type }} `
+            -- /m
+
+      - name: Test
+        working-directory: build
+        shell: pwsh
+        run: |
+          ctest `
+            -C ${{ matrix.build_type }} `
+            --output-on-failure
