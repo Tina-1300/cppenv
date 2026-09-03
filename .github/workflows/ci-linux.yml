@@ -1,0 +1,84 @@
+name: CI - Linux
+
+on:
+  push:
+    branches:
+      - main
+      - 'feat/**'
+      - 'feature/**'
+      - 'fix/**'
+      - 'bugfix/**'
+      - 'refact/**'
+      - 'refactor/**'
+      - 'hotfix/**'
+      - 'test/**'
+      - 'tests/**'
+      - 'ci/**'
+      - 'chore/**'
+
+  pull_request:
+    branches:
+      - main
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  checks: write
+
+jobs:
+  build-and-test:
+    name: Linux - ${{ matrix.build_type }}
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        build_type:
+          - Debug
+          - Release
+
+    steps:
+      # ============================================================
+      # Checkout
+      # ============================================================
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # ============================================================
+      # Dependencies
+      # ============================================================
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential \
+            cmake
+
+      # ============================================================
+      # Configure
+      # ============================================================
+
+      - name: Configure CMake
+        run: |
+          cmake -S . -B build \
+            -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
+            -DCMAKE_CXX_FLAGS="-Wall -Wextra -Wpedantic"
+
+      # ============================================================
+      # Build
+      # ============================================================
+
+      - name: Build
+        run: |
+          cmake --build build -j 2
+
+      # ============================================================
+      # Tests
+      # ============================================================
+
+      - name: Test
+        working-directory: build
+        run: |
+          ctest --output-on-failure -j 2
