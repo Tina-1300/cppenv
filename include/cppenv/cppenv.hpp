@@ -21,6 +21,10 @@
 
 namespace cppenv {
 
+    struct Config {
+        bool expansion = true;
+    };
+
 
 class EnvManager {
     public:
@@ -39,11 +43,27 @@ class EnvManager {
             return true;
         }
 
+        // load a .env file and configuration 
+        [[nodiscard]] bool load(const std::filesystem::path& path, const Config& configuration) {
+
+            std::ifstream file(path, std::ios::binary);
+
+            if (!file) {
+                return false;
+            }
+
+            load_from_stream(file, configuration);
+            return true;
+        }
+
         // Charge depuis un flux (utile pour les tests)
         void load(std::istream& stream) {
             load_from_stream(stream);
         }
 
+        void load(std::istream& stream, const Config& configuration) {
+            load_from_stream(stream, configuration);
+        }
 
         void set(std::string_view key, std::string_view value) {
             const auto [it, inserted] = vars_.insert_or_assign(
@@ -201,6 +221,17 @@ class EnvManager {
             expand_variables();
         }
 
+        void load_from_stream(std::istream& stream, const Config& configuration) {
+            clear();
+            parse_stream(stream);
+
+            if (configuration.expansion) {
+                expand_variables();
+            } else {
+                remove_expansions();
+            }
+        }
+
         // Parsing
         void parse_stream(std::istream& stream) {
 
@@ -224,6 +255,11 @@ class EnvManager {
 
             detail::VariableExpander expander(vars_);
             expander.resolve_all(ordered_keys_);
+        }
+
+        void remove_expansions() {
+            detail::VariableExpander expander(vars_);
+            expander.remove_expansions(ordered_keys_);
         }
 
 

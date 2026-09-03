@@ -1,5 +1,7 @@
 #pragma once
 
+
+
 #include <cctype>
 #include <string>
 #include <string_view>
@@ -30,14 +32,27 @@ class VariableExpander {
         }
 
 
+        void remove_expansions(const std::vector<std::string>& keys) {
+
+            for (const auto& key : keys) {
+
+                auto it = variables_.find(key);
+
+                if (it == variables_.end()) {
+                    continue;
+                }
+
+                it->second = remove_expansion_tokens(it->second);
+            }
+        }
+
+
+
     private:
         Variables& variables_;
 
 
-        std::string expand(
-            std::string_view value,
-            std::unordered_set<std::string>& resolving
-        ) {
+        std::string expand(std::string_view value, std::unordered_set<std::string>& resolving) {
 
             std::string result;
             result.reserve(value.size());
@@ -109,6 +124,72 @@ class VariableExpander {
 
             return result;
         }
+
+        std::string remove_expansion_tokens(std::string_view value) {
+
+            std::string result;
+            result.reserve(value.size());
+
+            for (std::size_t i = 0; i < value.size(); ++i) {
+
+                if (value[i] != '$') {
+                    result += value[i];
+                    continue;
+                }
+
+                // ${VARIABLE} ou ${VARIABLE:-default}
+                if (i + 1 < value.size() && value[i + 1] == '{') {
+
+                    const std::size_t end =
+                        find_closing_brace(value, i + 2);
+
+                    if (end == std::string_view::npos) {
+                        // Pas de fermeture : on conserve le '$'
+                        result += '$';
+                        continue;
+                    }
+
+                    // Expansion supprimée.
+                    i = end;
+                    continue;
+                }
+
+                // $VARIABLE
+                if (i + 1 < value.size()) {
+
+                    const unsigned char next =
+                        static_cast<unsigned char>(value[i + 1]);
+
+                    if (std::isalpha(next) || value[i + 1] == '_') {
+
+                        std::size_t end = i + 1;
+
+                        while (end < value.size()) {
+
+                            const unsigned char c =
+                                static_cast<unsigned char>(value[end]);
+
+                            if (!std::isalnum(c) && value[end] != '_') {
+                                break;
+                            }
+
+                            ++end;
+                        }
+
+                        // Expansion supprimée.
+                        i = end - 1;
+                        continue;
+                    }
+                }
+
+                // '$' seul : on le conserve.
+                result += '$';
+            }
+
+            return result;
+        }
+
+
 
 
         [[nodiscard]]
