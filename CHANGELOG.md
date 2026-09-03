@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.6.0](https://github.com/Tina-1300/cppenv/compare/v0.5.0...v0.6.0) (2026-09-03)
+
+
+### Features
+
+* add option to disable variable expansion ([d1e19aa](https://github.com/Tina-1300/cppenv/commit/d1e19aa51dd4cb30f15565893ef2ca5338f77795))
+
+
+### Bug Fixes
+
+* test expansion disable ([7009f19](https://github.com/Tina-1300/cppenv/commit/7009f190ea82de2b959d0d1744b94f21a1040e83))
+
 ## [0.5.0](https://github.com/Tina-1300/cppenv/compare/v0.4.0...v0.5.0) (2026-09-01)
 
 
