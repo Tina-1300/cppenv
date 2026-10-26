@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.7.0](https://github.com/Tina-1300/cppenv/compare/v0.6.0...v0.7.0) (2026-10-26)
+
+
+### Features
+
+* **vs:** add supports visual studio in .gitignore file ([442b529](https://github.com/Tina-1300/cppenv/commit/442b5294fa0721dc79720ce155c1e933314c2947))
+
+
+### Bug Fixes
+
+* **ci:** remove obsolete lukka/get-ninja action ([6e04201](https://github.com/Tina-1300/cppenv/commit/6e04201ab7604848dd89e1927d10843bb49825cf))
+
 ## [0.6.0](https://github.com/Tina-1300/cppenv/compare/v0.5.0...v0.6.0) (2026-09-03)
 
 
