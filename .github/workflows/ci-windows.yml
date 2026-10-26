@@ -40,9 +40,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Ninja
-        uses: lukka/get-ninja@latest
-
       - name: Configure CMake via Presets
         shell: pwsh
         run: |
